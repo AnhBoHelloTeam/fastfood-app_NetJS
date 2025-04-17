@@ -1,30 +1,34 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@ObjectType()
 @Entity()
 export class Product {
-  @Field(() => Int)
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field()
   @Column()
   name: string;
 
-  @Field()
   @Column()
   description: string;
 
-  @Field()
+  @Column('decimal', { precision: 10, scale: 2 })
+  price: number;
+
   @Column()
   image: string;
 
-  @Field()
-  @Column('decimal')
-  price: number;
-
-  @Field()
   @Column({ default: true })
-  available: boolean;
+  isAvailable: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
