@@ -4,6 +4,12 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
+import { OrdersModule } from './orders/orders.module';
+import { OrderItemsModule } from './order-items/order-items.module';
+import { PromotionsModule } from './promotions/promotions.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { CartItemsModule } from './cart-items/cart-items.module';
 
 @Module({
   imports: [
@@ -21,6 +27,12 @@ import { CategoriesModule } from './categories/categories.module';
     UsersModule,
     ProductsModule,
     CategoriesModule,
+    SuppliersModule,
+    OrdersModule,
+    OrderItemsModule,
+    PromotionsModule,
+    PaymentMethodsModule,
+    CartItemsModule,
   ],
 })
 export class AppModule {}

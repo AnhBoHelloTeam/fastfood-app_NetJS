@@ -1,9 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Order } from '../orders/order.entity';
+import { CartItem } from '../cart-items/cart-item.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('increment') // Thay 'uuid' bằng 'increment'
-  _id: number; // Thay 'string' bằng 'number'
+  @PrimaryGeneratedColumn('increment')
+  _id: number;
 
   @Column()
   name: string;
@@ -37,4 +39,10 @@ export class User {
 
   @Column({ type: 'datetime', nullable: true })
   verified_at: Date;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
+  cartItems: CartItem[];
 }

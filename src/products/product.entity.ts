@@ -1,5 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Category } from '../categories/category.entity';
+import { Supplier } from '../suppliers/supplier.entity';
+import { OrderItem } from '../order-items/order-item.entity';
+import { CartItem } from '../cart-items/cart-item.entity';
 
 @Entity('products')
 export class Product {
@@ -44,4 +47,13 @@ export class Product {
 
   @Column()
   quantity_in_stock: number;
+
+  @ManyToOne(() => Supplier, (supplier) => supplier.products)
+  supplier: Supplier;
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
+  orderItems: OrderItem[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
+  cartItems: CartItem[];
 }
