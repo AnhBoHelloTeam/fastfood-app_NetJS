@@ -10,6 +10,8 @@ import { OrderItemsModule } from './order-items/order-items.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
+import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { ChatMessagesModule } from './chat-messages/chat-messages.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { CartItemsModule } from './cart-items/cart-items.module';
     PromotionsModule,
     PaymentMethodsModule,
     CartItemsModule,
+    FeedbacksModule,
+    ChatMessagesModule,
   ],
 })
 export class AppModule {}

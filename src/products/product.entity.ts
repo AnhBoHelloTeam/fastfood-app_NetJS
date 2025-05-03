@@ -3,6 +3,7 @@ import { Category } from '../categories/category.entity';
 import { Supplier } from '../suppliers/supplier.entity';
 import { OrderItem } from '../order-items/order-item.entity';
 import { CartItem } from '../cart-items/cart-item.entity';
+import { Feedback } from '../feedbacks/feedback.entity';
 
 @Entity('products')
 export class Product {
@@ -56,4 +57,7 @@ export class Product {
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.product)
   cartItems: CartItem[];
+
+  @OneToMany(() => Feedback, (feedback) => feedback.product)
+  feedbacks: Feedback[];
 }
