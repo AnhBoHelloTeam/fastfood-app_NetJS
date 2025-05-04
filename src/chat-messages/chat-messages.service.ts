@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatMessage } from './chat-message.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class ChatMessagesService {
@@ -25,8 +26,12 @@ export class ChatMessagesService {
     return chatMessage;
   }
 
-  async create(chatMessage: Partial<ChatMessage>): Promise<ChatMessage> {
-    const newChatMessage = this.chatMessagesRepository.create(chatMessage);
+  async create(chatMessage: Partial<ChatMessage> & { senderId: number; receiverId: number }): Promise<ChatMessage> {
+    const newChatMessage = this.chatMessagesRepository.create({
+      ...chatMessage,
+      sender: { _id: chatMessage.senderId } as User,
+      receiver: { _id: chatMessage.receiverId } as User,
+    });
     return this.chatMessagesRepository.save(newChatMessage);
   }
 

@@ -1,8 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { Order } from '../orders/order.entity';
 import { CartItem } from '../cart-items/cart-item.entity';
 import { Feedback } from '../feedbacks/feedback.entity';
 import { ChatMessage } from '../chat-messages/chat-message.entity';
+import * as bcrypt from 'bcrypt';
 
 @Entity('users')
 export class User {
@@ -56,4 +57,13 @@ export class User {
 
   @OneToMany(() => ChatMessage, (chatMessage) => chatMessage.receiver)
   receivedMessages: ChatMessage[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+  }
 }

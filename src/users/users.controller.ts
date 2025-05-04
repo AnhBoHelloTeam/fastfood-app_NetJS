@@ -1,45 +1,42 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('users')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @Roles('admin')
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    const user = await this.usersService.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
-    }
-    return user;
+  @Roles('admin', 'user') // Cả admin và user có thể xem thông tin người dùng
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.usersService.findOne(id);
   }
 
   @Post()
+  @Roles('admin') // Chỉ admin tạo được người dùng mới
   create(@Body() user: Partial<User>): Promise<User> {
     return this.usersService.create(user);
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() user: Partial<User>): Promise<User> {
-    const updatedUser = await this.usersService.update(id, user);
-    if (!updatedUser) {
-      throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
-    }
-    return updatedUser;
+  @Roles('admin') // Chỉ admin cập nhật được người dùng
+  update(@Param('id', ParseIntPipe) id: number, @Body() user: Partial<User>): Promise<User> {
+    return this.usersService.update(id, user);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    const user = await this.usersService.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
-    }
+  @Roles('admin') // Chỉ admin xóa được người dùng
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.remove(id);
   }
 }

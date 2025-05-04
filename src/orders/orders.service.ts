@@ -1,13 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from './order.entity';
+import { User } from '../users/user.entity';
+import { Product } from '../products/product.entity';
+import { CreateOrderDto } from './orders.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
   ) {}
 
   async findAll(): Promise<Order[]> {
@@ -25,8 +30,33 @@ export class OrdersService {
     return order;
   }
 
-  async create(order: Partial<Order>): Promise<Order> {
-    const newOrder = this.ordersRepository.create(order);
+  async create(orderDto: CreateOrderDto): Promise<Order> {
+    // Kiểm tra tồn kho cho từng orderItem
+    for (const item of orderDto.orderItems) {
+      const product = await this.productsRepository.findOne({ where: { _id: item.productId } });
+      if (!product) {
+        throw new NotFoundException(`Không tìm thấy sản phẩm với ID ${item.productId}`);
+      }
+      if (product.quantity_in_stock < item.quantity) {
+        throw new BadRequestException(`Sản phẩm ${product.name} không đủ tồn kho. Còn lại: ${product.quantity_in_stock}`);
+      }
+    }
+
+    // Tạo đơn hàng
+    const newOrder = this.ordersRepository.create({
+      ...orderDto,
+      user: { _id: orderDto.userId } as User,
+      orderItems: orderDto.orderItems.map(item => ({
+        product: { _id: item.productId } as Product,
+        quantity: item.quantity,
+      })),
+    });
+
+    // Cập nhật tồn kho
+    for (const item of orderDto.orderItems) {
+      await this.productsRepository.decrement({ _id: item.productId }, 'quantity_in_stock', item.quantity);
+    }
+
     return this.ordersRepository.save(newOrder);
   }
 

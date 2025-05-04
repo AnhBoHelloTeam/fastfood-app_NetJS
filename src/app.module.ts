@@ -12,6 +12,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
 import { ChatMessagesModule } from './chat-messages/chat-messages.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ChatMessagesModule } from './chat-messages/chat-messages.module';
     CartItemsModule,
     FeedbacksModule,
     ChatMessagesModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

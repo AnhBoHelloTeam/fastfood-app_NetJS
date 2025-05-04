@@ -14,8 +14,20 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<User | null> {
-    return this.usersRepository.findOneBy({ _id: id });
+  async findOne(id: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { _id: id } });
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
+    }
+    return user;
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy người dùng với email ${email}`);
+    }
+    return user;
   }
 
   async create(user: Partial<User>): Promise<User> {
@@ -28,11 +40,13 @@ export class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
     }
-    const updatedUser = await this.findOne(id);
-    return updatedUser as User;
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    const result = await this.usersRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
+    }
   }
 }

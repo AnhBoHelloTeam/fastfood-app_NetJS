@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Feedback } from './feedback.entity';
+import { User } from '../users/user.entity';
+import { Product } from '../products/product.entity';
+import { CreateFeedbackDto } from './feedbacks.dto';
 
 @Injectable()
 export class FeedbacksService {
@@ -25,8 +28,20 @@ export class FeedbacksService {
     return feedback;
   }
 
-  async create(feedback: Partial<Feedback>): Promise<Feedback> {
-    const newFeedback = this.feedbacksRepository.create(feedback);
+  async create(feedbackDto: CreateFeedbackDto): Promise<Feedback> {
+    // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
+    const existingFeedback = await this.feedbacksRepository.findOne({
+      where: { user: { _id: feedbackDto.userId }, product: { _id: feedbackDto.productId } },
+    });
+    if (existingFeedback) {
+      throw new BadRequestException('Bạn đã đánh giá sản phẩm này rồi');
+    }
+
+    const newFeedback = this.feedbacksRepository.create({
+      ...feedbackDto,
+      user: { _id: feedbackDto.userId } as User,
+      product: { _id: feedbackDto.productId } as Product,
+    });
     return this.feedbacksRepository.save(newFeedback);
   }
 
