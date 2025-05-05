@@ -12,8 +12,8 @@ export class Promotion {
   @Column('decimal')
   discountValue: number;
 
-  @Column()
-  discountType: number;
+  @Column({ type: 'enum', enum: ['percentage', 'fixed'], default: 'percentage' })
+  discountType: 'percentage' | 'fixed';
 
   @Column({ type: 'datetime' })
   validFrom: Date;
@@ -21,25 +21,19 @@ export class Promotion {
   @Column({ type: 'datetime' })
   validTo: Date;
 
-  @Column()
+  @Column({ default: true })
   isActive: boolean;
 
-  @Column()
-  promotion_type: string;
-
-  @Column('decimal')
-  discount_amount: number;
-
-  @Column('decimal')
+  @Column('decimal', { default: 0 })
   min_order_value: number;
 
-  @Column('decimal')
+  @Column('decimal', { default: 0 })
   max_discount_amount: number;
 
-  @Column()
+  @Column({ default: 0 })
   usage_limit: number;
 
-  @Column()
+  @Column({ default: 0 })
   usage_count: number;
 
   @OneToMany(() => Order, (order) => order.promotion)

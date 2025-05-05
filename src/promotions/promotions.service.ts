@@ -44,4 +44,10 @@ export class PromotionsService {
       throw new NotFoundException(`Không tìm thấy mã giảm giá với ID ${id}`);
     }
   }
+
+  async toggleActive(id: number): Promise<Promotion> {
+    const promotion = await this.findOne(id);
+    promotion.isActive = !promotion.isActive;
+    return this.promotionsRepository.save(promotion);
+  }
 }

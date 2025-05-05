@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException, Patch } from '@nestjs/common';
 import { PromotionsService } from './promotions.service';
 import { Promotion } from './promotion.entity';
 
@@ -29,5 +29,10 @@ export class PromotionsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.promotionsService.remove(id);
+  }
+
+  @Patch(':id/toggle')
+  toggleActive(@Param('id', ParseIntPipe) id: number): Promise<Promotion> {
+    return this.promotionsService.toggleActive(id);
   }
 }
