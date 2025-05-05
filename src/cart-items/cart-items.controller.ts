@@ -1,14 +1,18 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
 import { CartItemsService } from './cart-items.service';
 import { CartItem } from './cart-item.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../users/user.entity';
 
 @Controller('cart-items')
+@UseGuards(AuthGuard('jwt'))
 export class CartItemsController {
   constructor(private readonly cartItemsService: CartItemsService) {}
 
   @Get()
-  findAll(): Promise<CartItem[]> {
-    return this.cartItemsService.findAll();
+  findAll(@GetUser() user: User): Promise<CartItem[]> {
+    return this.cartItemsService.findAll(user._id);
   }
 
   @Get(':id')
@@ -17,17 +21,21 @@ export class CartItemsController {
   }
 
   @Post()
-  create(@Body() cartItem: Partial<CartItem>): Promise<CartItem> {
-    return this.cartItemsService.create(cartItem);
+  create(@Body() cartItem: { productId: number; quantity?: number }, @GetUser() user: User): Promise<CartItem> {
+    return this.cartItemsService.create(cartItem, user._id);
   }
 
-  @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() cartItem: Partial<CartItem>): Promise<CartItem> {
-    return this.cartItemsService.update(id, cartItem);
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() cartItem: { quantity: number },
+    @GetUser() user: User,
+  ): Promise<CartItem> {
+    return this.cartItemsService.update(id, user._id, cartItem);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.cartItemsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @GetUser() user: User): Promise<void> {
+    return this.cartItemsService.remove(id, user._id);
   }
 }

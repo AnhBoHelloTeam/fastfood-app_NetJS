@@ -30,9 +30,9 @@ export class OrdersService {
     return order;
   }
 
-  async create(orderDto: CreateOrderDto): Promise<Order> {
-    // Kiểm tra tồn kho cho từng orderItem
-    for (const item of orderDto.orderItems) {
+  async create(createOrderDto: CreateOrderDto, userId: number): Promise<Order> {
+    // Kiểm tra tồn kho
+    for (const item of createOrderDto.orderItems) {
       const product = await this.productsRepository.findOne({ where: { _id: item.productId } });
       if (!product) {
         throw new NotFoundException(`Không tìm thấy sản phẩm với ID ${item.productId}`);
@@ -44,20 +44,20 @@ export class OrdersService {
 
     // Tạo đơn hàng
     const newOrder = this.ordersRepository.create({
-      ...orderDto,
-      user: { _id: orderDto.userId } as User,
-      orderItems: orderDto.orderItems.map(item => ({
+      ...createOrderDto,
+      user: { _id: userId } as User,
+      orderItems: createOrderDto.orderItems.map((item) => ({
         product: { _id: item.productId } as Product,
         quantity: item.quantity,
       })),
     });
 
-    // Cập nhật tồn kho
-    for (const item of orderDto.orderItems) {
-      await this.productsRepository.decrement({ _id: item.productId }, 'quantity_in_stock', item.quantity);
+    // Lưu đơn hàng và ép kiểu về Order
+    const savedOrder = await this.ordersRepository.save(newOrder);
+    if (Array.isArray(savedOrder)) {
+      return savedOrder[0]; // Lấy Order đầu tiên nếu save trả về mảng
     }
-
-    return this.ordersRepository.save(newOrder);
+    return savedOrder;
   }
 
   async update(id: number, order: Partial<Order>): Promise<Order> {

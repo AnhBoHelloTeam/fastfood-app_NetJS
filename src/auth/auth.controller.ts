@@ -1,14 +1,18 @@
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService, RegisterDto } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() user: any) {
-    if (!user.email || !user.password || !user.name) {
-      throw new BadRequestException('Vui lòng cung cấp email, mật khẩu và tên');
+  async register(@Body() user: RegisterDto) {
+    const requiredFields = ['name', 'email', 'password', 'address', 'phone', 'delivery_address'];
+    const missingFields = requiredFields.filter((field) => !user[field]);
+    if (missingFields.length > 0) {
+      throw new BadRequestException(
+        `Vui lòng cung cấp đầy đủ thông tin: ${missingFields.join(', ')}`,
+      );
     }
     return this.authService.register(user);
   }

@@ -32,7 +32,7 @@ export class OrdersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('user')
   create(@Body() createOrderDto: CreateOrderDto, @Request() req): Promise<Order> {
-    return this.ordersService.create({ ...createOrderDto, userId: req.user._id });
+    return this.ordersService.create(createOrderDto, req.user._id);
   }
 
   @Put(':id')

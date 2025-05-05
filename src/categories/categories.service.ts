@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './category.entity';
+import { Product } from '../products/product.entity';
 
 @Injectable()
 export class CategoriesService {
@@ -23,6 +24,17 @@ export class CategoriesService {
       throw new NotFoundException(`Không tìm thấy danh mục với ID ${id}`);
     }
     return category;
+  }
+
+  async findProductsByCategory(id: number): Promise<Product[]> {
+    const category = await this.categoriesRepository.findOne({
+      where: { _id: id },
+      relations: ['products', 'products.supplier'],
+    });
+    if (!category) {
+      throw new NotFoundException(`Không tìm thấy danh mục với ID ${id}`);
+    }
+    return category.products;
   }
 
   async create(category: Partial<Category>): Promise<Category> {

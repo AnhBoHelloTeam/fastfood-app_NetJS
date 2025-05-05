@@ -3,6 +3,18 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 
+export interface RegisterDto {
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  address: string;
+  phone: string;
+  avatar?: string;
+  delivery_address: string;
+  is_active?: boolean;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -10,10 +22,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(user: any): Promise<any> {
+  async register(user: RegisterDto): Promise<any> {
     const newUser = await this.usersService.create({
       ...user,
-      role: user.role || 'user', // Mặc định là 'user'
+      role: user.role || 'user',
+      is_active: user.is_active !== undefined ? user.is_active : true,
     });
     const { password, ...result } = newUser;
     return result;

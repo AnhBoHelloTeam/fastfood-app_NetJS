@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -22,15 +22,18 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new NotFoundException(`Không tìm thấy người dùng với email ${email}`);
-    }
-    return user;
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
   }
 
   async create(user: Partial<User>): Promise<User> {
+    if (!user.email) {
+      throw new BadRequestException('Email là bắt buộc');
+    }
+    const existingUser = await this.findByEmail(user.email);
+    if (existingUser) {
+      throw new ConflictException('Email đã được sử dụng');
+    }
     const newUser = this.usersRepository.create(user);
     return this.usersRepository.save(newUser);
   }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsEnum, Min, ArrayNotEmpty, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsEnum, Min, ArrayNotEmpty, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum OrderStatus {
@@ -64,8 +64,7 @@ export class CreateOrderDto {
   @Type(() => OrderItemDto)
   orderItems: OrderItemDto[];
 
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  userId: number;
+  @IsOptional()
+  @IsString()
+  promotion_code?: string;
 }

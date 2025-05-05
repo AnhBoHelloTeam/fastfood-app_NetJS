@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
@@ -26,6 +26,11 @@ export class ProductsService {
   }
 
   async create(product: Partial<Product>): Promise<Product> {
+    const requiredFields = ['name', 'price', 'description', 'image', 'unit', 'slug', 'quantity_in_stock', 'category', 'supplier'];
+    const missingFields = requiredFields.filter((field) => !product[field]);
+    if (missingFields.length > 0) {
+      throw new BadRequestException(`Vui lòng cung cấp: ${missingFields.join(', ')}`);
+    }
     const newProduct = this.productsRepository.create(product);
     return this.productsRepository.save(newProduct);
   }

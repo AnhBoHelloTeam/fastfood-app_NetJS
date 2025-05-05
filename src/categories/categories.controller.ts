@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { Category } from './category.entity';
+import { Product } from '../products/product.entity';
 
 @Controller('categories')
 export class CategoriesController {
@@ -14,6 +15,11 @@ export class CategoriesController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number): Promise<Category> {
     return this.categoriesService.findOne(id);
+  }
+
+  @Get(':id/products')
+  findProductsByCategory(@Param('id', ParseIntPipe) id: number): Promise<Product[]> {
+    return this.categoriesService.findProductsByCategory(id);
   }
 
   @Post()
