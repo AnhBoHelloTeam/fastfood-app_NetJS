@@ -91,4 +91,12 @@ export class CartItemsService {
       throw new NotFoundException(`Không tìm thấy mục giỏ hàng với ID ${id}`);
     }
   }
+
+  async removeAll(userId: number): Promise<void> {
+    const cartItems = await this.findAll(userId);
+    if (cartItems.length === 0) {
+      return;
+    }
+    await this.cartItemsRepository.remove(cartItems);
+  }
 }

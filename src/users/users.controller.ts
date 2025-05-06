@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,26 +17,32 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles('admin', 'user') // Cả admin và user có thể xem thông tin người dùng
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  @Roles('admin', 'user')
+  findOne(@Param('id') id: number): Promise<User> {
     return this.usersService.findOne(id);
   }
 
   @Post()
-  @Roles('admin') // Chỉ admin tạo được người dùng mới
+  @Roles('admin')
   create(@Body() user: Partial<User>): Promise<User> {
     return this.usersService.create(user);
   }
 
   @Put(':id')
-  @Roles('admin') // Chỉ admin cập nhật được người dùng
-  update(@Param('id', ParseIntPipe) id: number, @Body() user: Partial<User>): Promise<User> {
+  @Roles('admin')
+  update(@Param('id') id: number, @Body() user: Partial<User>): Promise<User> {
     return this.usersService.update(id, user);
   }
 
   @Delete(':id')
-  @Roles('admin') // Chỉ admin xóa được người dùng
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  @Roles('admin')
+  remove(@Param('id') id: number): Promise<void> {
     return this.usersService.remove(id);
+  }
+
+  @Get('me')
+  @Roles('admin', 'user')
+  findMe(@Req() req): Promise<User> {
+    return this.usersService.findOne(req.user.id);
   }
 }

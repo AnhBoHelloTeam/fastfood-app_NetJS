@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderItem } from './order-item.entity';
+import { Order } from '../orders/order.entity';
+import { Product } from '../products/product.entity';
 
 @Injectable()
 export class OrderItemsService {
@@ -25,9 +27,9 @@ export class OrderItemsService {
     return orderItem;
   }
 
-  async create(orderItem: Partial<OrderItem>): Promise<OrderItem> {
-    const newOrderItem = this.orderItemsRepository.create(orderItem);
-    return this.orderItemsRepository.save(newOrderItem);
+  async create(data: { order: Order; product: Product; quantity: number; price: number }): Promise<OrderItem> {
+    const orderItem = this.orderItemsRepository.create(data);
+    return this.orderItemsRepository.save(orderItem);
   }
 
   async update(id: number, orderItem: Partial<OrderItem>): Promise<OrderItem> {
@@ -41,7 +43,7 @@ export class OrderItemsService {
   async remove(id: number): Promise<void> {
     const result = await this.orderItemsRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Không tìm thấy mụcyczny đơn hàng với ID ${id}`);
+      throw new NotFoundException(`Không tìm thấy mục đơn hàng với ID ${id}`);
     }
   }
 }

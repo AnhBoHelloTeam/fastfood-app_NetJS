@@ -3,6 +3,7 @@ import { User } from '../users/user.entity';
 import { OrderItem } from '../order-items/order-item.entity';
 import { Promotion } from '../promotions/promotion.entity';
 import { PaymentMethod } from '../payment-methods/payment-method.entity';
+import { Notification } from '../notifications/notification.entity';
 
 @Entity('orders')
 export class Order {
@@ -56,4 +57,7 @@ export class Order {
 
   @ManyToOne(() => PaymentMethod, (paymentMethod) => paymentMethod.orders)
   paymentMethodEntity: PaymentMethod;
+
+  @OneToMany(() => Notification, (notification) => notification.order)
+  notifications: Notification[];
 }

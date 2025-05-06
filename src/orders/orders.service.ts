@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Order } from './order.entity';
 import { User } from '../users/user.entity';
 import { Product } from '../products/product.entity';
+import { OrderItemsService } from '../order-items/order-items.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './orders.dto';
 
 @Injectable()
@@ -13,16 +15,29 @@ export class OrdersService {
     private ordersRepository: Repository<Order>,
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
+    private orderItemsService: OrderItemsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async findAll(): Promise<Order[]> {
-    return this.ordersRepository.find({ relations: ['user', 'orderItems'] });
+    return this.ordersRepository.find({ 
+      relations: ['user', 'orderItems', 'orderItems.product', 'orderItems.product.supplier', 'promotion', 'paymentMethodEntity', 'notifications'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findByUser(userId: number): Promise<Order[]> {
+    return this.ordersRepository.find({
+      where: { user: { _id: userId } },
+      relations: ['user', 'orderItems', 'orderItems.product', 'orderItems.product.supplier', 'promotion', 'paymentMethodEntity', 'notifications'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findOne(id: number): Promise<Order> {
     const order = await this.ordersRepository.findOne({
       where: { _id: id },
-      relations: ['user', 'orderItems'],
+      relations: ['user', 'orderItems', 'orderItems.product', 'orderItems.product.supplier', 'promotion', 'paymentMethodEntity', 'notifications'],
     });
     if (!order) {
       throw new NotFoundException(`Không tìm thấy đơn hàng với ID ${id}`);
@@ -31,7 +46,6 @@ export class OrdersService {
   }
 
   async create(createOrderDto: CreateOrderDto, userId: number): Promise<Order> {
-    // Kiểm tra tồn kho
     for (const item of createOrderDto.orderItems) {
       const product = await this.productsRepository.findOne({ where: { _id: item.productId } });
       if (!product) {
@@ -42,22 +56,31 @@ export class OrdersService {
       }
     }
 
-    // Tạo đơn hàng
     const newOrder = this.ordersRepository.create({
       ...createOrderDto,
       user: { _id: userId } as User,
-      orderItems: createOrderDto.orderItems.map((item) => ({
-        product: { _id: item.productId } as Product,
-        quantity: item.quantity,
-      })),
+      orderItems: [],
+      createdAt: new Date(),
     });
 
-    // Lưu đơn hàng và ép kiểu về Order
     const savedOrder = await this.ordersRepository.save(newOrder);
-    if (Array.isArray(savedOrder)) {
-      return savedOrder[0]; // Lấy Order đầu tiên nếu save trả về mảng
+
+    for (const item of createOrderDto.orderItems) {
+      const product = await this.productsRepository.findOne({ where: { _id: item.productId } });
+      if (!product) {
+        throw new NotFoundException(`Không tìm thấy sản phẩm với ID ${item.productId}`);
+      }
+      await this.orderItemsService.create({
+        order: savedOrder,
+        product,
+        quantity: item.quantity,
+        price: product.price,
+      });
+      product.quantity_in_stock -= item.quantity;
+      await this.productsRepository.save(product);
     }
-    return savedOrder;
+
+    return this.findOne(savedOrder._id);
   }
 
   async update(id: number, order: Partial<Order>): Promise<Order> {
@@ -73,5 +96,23 @@ export class OrdersService {
     if (result.affected === 0) {
       throw new NotFoundException(`Không tìm thấy đơn hàng với ID ${id}`);
     }
+  }
+
+  async confirmOrder(id: number): Promise<Order> {
+    const order = await this.findOne(id);
+    if (order.status !== 'pending') {
+      throw new BadRequestException(`Đơn hàng không ở trạng thái pending`);
+    }
+    order.status = 'shipped';
+    return this.ordersRepository.save(order);
+  }
+
+  async deliverOrder(id: number): Promise<Order> {
+    const order = await this.findOne(id);
+    if (order.status !== 'shipped') {
+      throw new BadRequestException(`Đơn hàng không ở trạng thái shipped`);
+    }
+    order.status = 'delivered';
+    return this.ordersRepository.save(order);
   }
 }

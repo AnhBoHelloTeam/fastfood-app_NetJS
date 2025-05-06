@@ -16,6 +16,11 @@ export class PromotionsController {
     return this.promotionsService.findOne(id);
   }
 
+  @Get('code/:code')
+  findByCode(@Param('code') code: string): Promise<Promotion> {
+    return this.promotionsService.findByCode(code);
+  }
+
   @Post()
   create(@Body() promotion: Partial<Promotion>): Promise<Promotion> {
     return this.promotionsService.create(promotion);

@@ -3,6 +3,7 @@ import { Order } from '../orders/order.entity';
 import { CartItem } from '../cart-items/cart-item.entity';
 import { Feedback } from '../feedbacks/feedback.entity';
 import { ChatMessage } from '../chat-messages/chat-message.entity';
+import { Notification } from '../notifications/notification.entity';
 import * as bcrypt from 'bcrypt';
 
 @Entity('users')
@@ -57,6 +58,9 @@ export class User {
 
   @OneToMany(() => ChatMessage, (chatMessage) => chatMessage.receiver)
   receivedMessages: ChatMessage[];
+
+  @OneToMany(() => Notification, (notification) => notification.recipient)
+  notifications: Notification[];
 
   @BeforeInsert()
   @BeforeUpdate()

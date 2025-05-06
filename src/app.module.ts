@@ -13,6 +13,7 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
 import { ChatMessagesModule } from './chat-messages/chat-messages.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuthModule } from './auth/auth.module';
     FeedbacksModule,
     ChatMessagesModule,
     AuthModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

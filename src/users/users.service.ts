@@ -26,6 +26,14 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
+  async findAdmin(): Promise<User> {
+    const admin = await this.usersRepository.findOne({ where: { role: 'admin' } });
+    if (!admin) {
+      throw new NotFoundException('Không tìm thấy admin');
+    }
+    return admin;
+  }
+
   async create(user: Partial<User>): Promise<User> {
     if (!user.email) {
       throw new BadRequestException('Email là bắt buộc');

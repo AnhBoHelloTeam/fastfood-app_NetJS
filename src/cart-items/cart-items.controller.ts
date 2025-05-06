@@ -38,4 +38,9 @@ export class CartItemsController {
   remove(@Param('id', ParseIntPipe) id: number, @GetUser() user: User): Promise<void> {
     return this.cartItemsService.remove(id, user._id);
   }
+
+  @Delete()
+  removeAll(@GetUser() user: User): Promise<void> {
+    return this.cartItemsService.removeAll(user._id);
+  }
 }

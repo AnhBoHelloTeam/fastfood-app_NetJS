@@ -1,6 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { OrderItemsService } from './order-items.service';
 import { OrderItem } from './order-item.entity';
+import { OrderItemDto } from './order-items.dto';
+import { Order } from '../orders/order.entity';
+import { Product } from '../products/product.entity';
 
 @Controller('order-items')
 export class OrderItemsController {
@@ -17,7 +20,13 @@ export class OrderItemsController {
   }
 
   @Post()
-  create(@Body() orderItem: Partial<OrderItem>): Promise<OrderItem> {
+  async create(@Body() orderItemDto: OrderItemDto): Promise<OrderItem> {
+    const orderItem = {
+      order: { _id: orderItemDto.orderId } as Order,
+      product: { _id: orderItemDto.productId } as Product,
+      quantity: orderItemDto.quantity,
+      price: orderItemDto.price,
+    };
     return this.orderItemsService.create(orderItem);
   }
 

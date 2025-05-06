@@ -25,6 +25,26 @@ export class PromotionsService {
     return promotion;
   }
 
+  async findByCode(code: string): Promise<Promotion> {
+    const promotion = await this.promotionsRepository.findOne({
+      where: { code },
+      relations: ['orders'],
+    });
+    if (!promotion) {
+      throw new NotFoundException(`Không tìm thấy mã giảm giá với mã ${code}`);
+    }
+    if (!promotion.isActive) {
+      throw new NotFoundException(`Mã giảm giá ${code} hiện không hoạt động`);
+    }
+    const currentDate = new Date();
+    const validFrom = new Date(promotion.validFrom);
+    const validTo = new Date(promotion.validTo);
+    if (currentDate < validFrom || currentDate > validTo) {
+      throw new NotFoundException(`Mã giảm giá ${code} đã hết hạn hoặc chưa bắt đầu`);
+    }
+    return promotion;
+  }
+
   async create(promotion: Partial<Promotion>): Promise<Promotion> {
     const newPromotion = this.promotionsRepository.create(promotion);
     return this.promotionsRepository.save(newPromotion);
