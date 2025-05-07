@@ -28,6 +28,13 @@ export class FeedbacksService {
     return feedback;
   }
 
+  async findByProduct(productId: number): Promise<Feedback[]> {
+    return this.feedbacksRepository.find({
+      where: { product: { _id: productId } },
+      relations: ['user', 'product'],
+    });
+  }
+
   async create(feedbackDto: CreateFeedbackDto): Promise<Feedback> {
     // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
     const existingFeedback = await this.feedbacksRepository.findOne({

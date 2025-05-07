@@ -12,6 +12,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
 import { ChatMessagesModule } from './chat-messages/chat-messages.module';
+import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
@@ -41,6 +42,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     ChatMessagesModule,
     AuthModule,
     NotificationsModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

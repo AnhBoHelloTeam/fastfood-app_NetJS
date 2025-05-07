@@ -28,7 +28,7 @@ export class ChatMessagesService {
 
   async create(chatMessage: Partial<ChatMessage> & { senderId: number; receiverId: number }): Promise<ChatMessage> {
     const newChatMessage = this.chatMessagesRepository.create({
-      ...chatMessage,
+      content: chatMessage.content,
       sender: { _id: chatMessage.senderId } as User,
       receiver: { _id: chatMessage.receiverId } as User,
     });

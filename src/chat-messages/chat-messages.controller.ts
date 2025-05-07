@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, NotFoundException, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { ChatMessagesService } from './chat-messages.service';
 import { ChatMessage } from './chat-message.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { UsersService } from '../users/users.service';
 
 @Controller('chat-messages')
 export class ChatMessagesController {
-  constructor(private readonly chatMessagesService: ChatMessagesService) {}
+  constructor(
+    private readonly chatMessagesService: ChatMessagesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -35,8 +39,24 @@ export class ChatMessagesController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('user')
-  create(@Body() chatMessage: Partial<ChatMessage> & { receiverId: number }, @Request() req): Promise<ChatMessage> {
+  @Roles('user', 'admin')
+  async create(@Body() chatMessage: Partial<ChatMessage> & { receiverId: number }, @Request() req): Promise<ChatMessage> {
+    if (req.user.role === 'user') {
+      // User chỉ nhắn được tới admin
+      const admin = await this.usersService.findAdmin();
+      if (chatMessage.receiverId && chatMessage.receiverId !== admin._id) {
+        throw new BadRequestException('User chỉ có thể nhắn tin tới admin');
+      }
+      return this.chatMessagesService.create({
+        ...chatMessage,
+        senderId: req.user._id,
+        receiverId: admin._id,
+      });
+    }
+    // Admin có thể nhắn tới bất kỳ user
+    if (!chatMessage.receiverId) {
+      throw new BadRequestException('ReceiverId là bắt buộc cho admin');
+    }
     return this.chatMessagesService.create({
       ...chatMessage,
       senderId: req.user._id,

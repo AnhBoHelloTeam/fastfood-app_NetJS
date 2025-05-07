@@ -15,6 +15,7 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
+    console.log('UsersService.findOne - id:', id, 'typeof id:', typeof id);
     const user = await this.usersRepository.findOne({ where: { _id: id } });
     if (!user) {
       throw new NotFoundException(`Không tìm thấy người dùng với ID ${id}`);
