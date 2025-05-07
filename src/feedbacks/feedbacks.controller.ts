@@ -21,9 +21,8 @@ export class FeedbacksController {
   }
 
   @Get('product/:productId')
-  async getFeedbackByProduct(@Param('productId', ParseIntPipe) productId: number) {
-    const feedbacks = await this.feedbacksService.findByProduct(productId);
-    return { data: feedbacks, averageRating: feedbacks.length ? feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length : 0, totalFeedbacks: feedbacks.length };
+  getProductFeedback(@Param('productId', ParseIntPipe) productId: number) {
+    return this.feedbacksService.getProductFeedback(productId);
   }
 
   @Post()

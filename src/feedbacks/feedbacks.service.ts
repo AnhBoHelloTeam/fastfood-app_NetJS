@@ -28,13 +28,6 @@ export class FeedbacksService {
     return feedback;
   }
 
-  async findByProduct(productId: number): Promise<Feedback[]> {
-    return this.feedbacksRepository.find({
-      where: { product: { _id: productId } },
-      relations: ['user', 'product'],
-    });
-  }
-
   async create(feedbackDto: CreateFeedbackDto): Promise<Feedback> {
     // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
     const existingFeedback = await this.feedbacksRepository.findOne({
@@ -65,5 +58,21 @@ export class FeedbacksService {
     if (result.affected === 0) {
       throw new NotFoundException(`Không tìm thấy đánh giá với ID ${id}`);
     }
+  }
+
+  async getProductFeedback(productId: number) {
+    const feedbacks = await this.feedbacksRepository.find({
+      where: { product: { _id: productId } },
+      relations: ['user', 'product'],
+    });
+    const totalFeedbacks = feedbacks.length;
+    const averageRating = totalFeedbacks > 0
+      ? feedbacks.reduce((sum, f) => sum + f.rating, 0) / totalFeedbacks
+      : 0;
+    return {
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      totalFeedbacks,
+      feedbacks,
+    };
   }
 }
