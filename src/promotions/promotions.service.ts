@@ -36,6 +36,8 @@ export class PromotionsService {
     if (!promotion.isActive) {
       throw new NotFoundException(`Mã giảm giá ${code} hiện không hoạt động`);
     }
+
+    // Kiểm tra thời gian hiệu lực
     const currentDate = new Date();
     const validFrom = new Date(promotion.validFrom);
     const validTo = new Date(promotion.validTo);
@@ -45,6 +47,7 @@ export class PromotionsService {
     return promotion;
   }
 
+  // Tạo mã khuyến mãi mới
   async create(promotion: Partial<Promotion>): Promise<Promotion> {
     const newPromotion = this.promotionsRepository.create(promotion);
     return this.promotionsRepository.save(newPromotion);
@@ -65,6 +68,9 @@ export class PromotionsService {
     }
   }
 
+  
+
+  // Bật/tắt trạng thái hoạt động của mã giảm giá
   async toggleActive(id: number): Promise<Promotion> {
     const promotion = await this.findOne(id);
     promotion.isActive = !promotion.isActive;
